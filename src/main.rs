@@ -67,7 +67,7 @@ enum OutObject<'a> {
         authors: Vec<&'a str>,
 
         #[serde(skip_serializing_if = "Option::is_none")]
-        publish_year: Option<u64>,
+        publish_year: Option<u32>,
 
         #[serde(skip_serializing_if = "Option::is_none")]
         number_of_pages: Option<u64>,
@@ -147,11 +147,15 @@ fn main() -> anyhow::Result<()> {
                         .flatten()
                         .collect();
 
+                    let publish_year = book.publish_date.and_then(|s| {
+                        s.get(s.len() - 4..).and_then(|s| s.parse().ok())
+                    });
+
                     let book = OutObject::Book {
                         id: book_id,
                         name: &book.title,
                         authors: authors,
-                        publish_year: None,
+                        publish_year,
                         number_of_pages: book.number_of_pages,
                         subjects: book.subjects.unwrap_or_default(),
                         goodreads,
